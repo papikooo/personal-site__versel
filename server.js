@@ -4,61 +4,60 @@ import cors from 'cors';
 import { createClient } from 'microcms-js-sdk';
 
 
- // .env ファイルを読み込む
+ // .env
 dotenv.config();
-// Expressアプリケーションの作成
+// Express
 const app = express();
-const port = 3000; // 任意のポートを指定
+const port = process.env.PORT || 3000;
 
-// CORSを有効化（フロントエンドのURLを許可）
+// CORS
 app.use(cors({
-  origin: 'http://localhost:5173', // フロントエンドのURLを指定
-  methods: 'GET'
+  origin: '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// MicroCMSクライアントの作成
+// MicroCMS
 const client = createClient({
-  serviceDomain: process.env.MICROCMS_SERVICE_DOMAIN, // .env ファイルなどで設定
-  apiKey: process.env.MICROCMS_API_KEY, // .env ファイルなどで設定
+  serviceDomain: process.env.MICROCMS_SERVICE_DOMAIN,
+  apiKey: process.env.MICROCMS_API_KEY,
 });
 
-// 全記事またはカテゴリごとの記事を取得
+// get category
 app.get('/api/notes', async (req, res) => {
   try {
     const { category, limit } = req.query;
     const queries = {};
-    
+
     if (category) {
       queries.filters = `category[equals]${category}`;
     }
     if (limit) {
-      queries.limit = parseInt(limit, 10); // 数値に変換
+      queries.limit = parseInt(limit, 10);
     }
 
-    // MicroCMSからデータを取得
     const response = await client.get({
       endpoint: 'notes',
       queries,
     });
-    // 成功したらレスポンスを返す
-    res.setHeader('Content-Type', 'application/json'); // JSONを明示
+
+    res.setHeader('Content-Type', 'application/json');
     res.json(response);
   } catch (error) {
-    // エラー処理
+    // error
     console.error('Error fetching data from MicroCMS:', error);
     res.status(500).json({ error: 'Failed to fetch blogs' });
   }
 });
 
-// 個別記事を取得
+// get one
 app.get('/api/notes/:postId', async (req, res) => {
   try {
     const { postId } = req.params;
 
-    // MicroCMS から該当記事を取得
     const response = await client.get({
       endpoint: 'notes',
-      contentId: postId, // contentId を指定
+      contentId: postId,
     });
 
     res.setHeader('Content-Type', 'application/json');
@@ -66,7 +65,7 @@ app.get('/api/notes/:postId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching blog post:', error);
 
-    // MicroCMS API の 404 エラーを適切に処理
+    // error
     if (error.response?.status === 404) {
       res.status(404).json({ error: 'Post not found' });
     } else {
@@ -75,10 +74,5 @@ app.get('/api/notes/:postId', async (req, res) => {
   }
 });
 
-// 静的ファイルの提供（フロントエンドのビルドファイル）
-app.use(express.static('dist')); // distはビルドされたVueプロジェクトのフォルダ
-
-// サーバーを起動
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+//versel hosting
+export default app;

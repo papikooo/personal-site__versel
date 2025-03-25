@@ -13,8 +13,7 @@ const port = process.env.PORT || 3000;
 // CORS
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: 'GET',
 }));
 
 // MicroCMS

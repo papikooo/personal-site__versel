@@ -74,4 +74,8 @@ app.get('/api/notes/:postId', async (req, res) => {
 });
 
 //versel hosting
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+
 export default app;
